@@ -4,6 +4,8 @@
 //jest & supertest: For testing.
 const express=require('express')
 const cors = require ('cors')
+const connectMongoDB = require("./db");
+const userRequestRoutes = require("./routes/userRequestRoutes");
 const itemRoutes=require('./routes/itemRoutes.js')
 const app=express()
 
@@ -19,3 +21,22 @@ app.listen(PORT, ()=>{
 app.get("/", (req, res) => {
     res.send("Welcome to Lab Inventory & Management System Backend!");
   });
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+app.use("/api/user-requests", userRequestRoutes);
+
+app.use((error, req, res, next) => {
+  console.error(error);
+
+  res.status(500).json({
+    message: "Internal server error",
+  });
+});
+
+connectMongoDB().then(() => {
+  app.listen(process.env.PORT || 3000, () => {
+    console.log("Server running");
+  });
+})
